@@ -12,7 +12,7 @@ use MARC::Record;
 use C4::Context;
 
 ## Here we set our plugin version
-our $VERSION = "1.0.0";
+our $VERSION = "1.0.1";
 
 ## Here is our metadata, some keys are required, some are optional
 our $metadata = {
@@ -20,7 +20,7 @@ our $metadata = {
     author => 'Michael Hafen',
     description => 'This plugin creates Koha compatible MARC records from USMARC records with 852 holdings.',
     date_authored   => '2021-05-06',
-    date_updated    => '2021-05-06',
+    date_updated    => '2021-08-17',
     minimum_version => undef,
     maximum_version => undef,
     version         => $VERSION,
@@ -77,6 +77,34 @@ sub to_marc {
             $notes = join('|',$field_852->subfield('z'));
             $urls = join('|',$field_852->subfield('u'));
             $type = $record->subfield('942','c');
+
+            # validate branchcode for home and holding branch
+            my $libraries_filter = {};
+            if ( C4::Context->only_my_library() ) {
+                $libraries_filter->{'branchcode'} = C4::Context->userenv->{'branch'};
+            }
+            my $libraries = Koha::Libraries->search($libraries_filter)->unblessed;
+            unless ( $homeb && grep { $_->{'branchcode'} eq $homeb } @$libraries ) {
+                $homeb = C4::Context->userenv->{'branch'} || undef;
+            }
+            unless ( $holdb && grep { $_->{'branchcode'} eq $holdb } @$libraries ) {
+                $holdb = C4::Context->userenv->{'branch'} || undef;
+            }
+
+            # validate item type
+            my $itemtypes = Koha::ItemTypes->search_with_localization($libraries_filter)->unblessed;
+            unless ( $type && grep { $_->{'itemtype'} eq $type } @$itemtypes ) {
+                $type = undef;
+            }
+
+            # check barcode is unique
+            #  FIXME - I'm adding homebranch to this barcode search because
+            #   of something on my fork of Koha.  You probably don't want
+            #   to do that!
+            if ( my $item = Koha::Items->find({ barcode => $bar, homebranch => C4::Context->userenv->{'branch'} }) ) {
+                $bar = undef;
+            }
+
             push( @fields, 'a' => $homeb ) if ( $homeb );
             push( @fields, 'b' => $holdb ) if ( $holdb );
             push( @fields, 'o' => $call ) if ( $call );
