@@ -89,16 +89,16 @@ sub show_results {
     if ( $branch && $search && $new_itype ) {
         my @params = ($branch);
         my $query = '
-SELECT itemnumber,biblioitemnumber,biblionumber,itemcallnumber,itemtype
-  FROM items
-       CROSS JOIN biblioitems USING (biblioitemnumber)
- WHERE homebranch = ? AND ';
+SELECT i.itemnumber,i.itemcallnumber,bi.itemtype
+  FROM items AS i
+       CROSS JOIN biblioitems AS bi USING (biblioitemnumber)
+ WHERE i.homebranch = ? AND ';
         if ( $old_itype ) {
-            $query .= 'itype = ?';
+            $query .= 'i.itype = ?';
             push @params, $old_itype;
         }
         else {
-            $query .= '( itype IS NULL OR itype = "" )';
+            $query .= '( i.itype IS NULL OR i.itype = "" )';
         }
         my $sth = $dbh->prepare($query);
         $sth->execute(@params);
