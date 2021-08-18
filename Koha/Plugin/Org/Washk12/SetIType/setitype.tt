@@ -86,7 +86,7 @@
             </li>
             <li>
                 <label for="backport">Set Title item type also if it isn't set</label>
-                <input name="backport" id="backport" type="checkbox"/>
+                <input name="backport" id="backport" type="checkbox" checked/>
             </li>
         </ol>
     </fieldset>
