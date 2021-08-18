@@ -80,25 +80,33 @@ sub show_results {
     my (@items,$changed_items,$changed_bibs);
     my ($search,$new_itype,$old_itype,$backport);
     my $branch = $input->param('branch');
-    $branch = ( C4::Context->only_my_library('IndependentBranchesHideOtherBranchesItems') ? C4::Context->userenv->{branch} : $branch );
+    $branch = ( C4::Context->only_my_library() ? C4::Context->userenv->{branch} : $branch );
     $search = $input->param('callnumber');
     $new_itype = $input->param('itype');
     $old_itype = $input->param('old_itype') || undef;
     $backport = $input->param('backport') || 0;
 
-    if ( $branch && $search && $new_itype ) {
-        my @params = ($branch);
+    if ( $search && $new_itype ) {
+        my @params;
+        my @where;
         my $query = '
 SELECT i.itemnumber,i.itemcallnumber,bi.itemtype
   FROM items AS i
        CROSS JOIN biblioitems AS bi USING (biblioitemnumber)
- WHERE i.homebranch = ? AND ';
+';
+        if ( $branch ) {
+            push @where, 'i.homebranch = ?';
+            push @params, $branch;
+        }
         if ( $old_itype ) {
-            $query .= 'i.itype = ?';
+            push @where, 'i.itype = ?';
             push @params, $old_itype;
         }
         else {
-            $query .= '( i.itype IS NULL OR i.itype = "" )';
+            push @where, '( i.itype IS NULL OR i.itype = "" )';
+        }
+        if ( @where ) {
+            $query .= ' WHERE '. join( ' AND ', @where );
         }
         my $sth = $dbh->prepare($query);
         $sth->execute(@params);
