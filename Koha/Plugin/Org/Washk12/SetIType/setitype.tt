@@ -24,7 +24,7 @@
             </li>
             [% IF step > 1 %]
             <li>
-                <a href="/cgi-bin/koha/tools/external-member-sync.pl">Set item type</a>
+                <a href="/cgi-bin/koha/plugins/run.pl?class=[% CLASS | html %]&amp;method=[% METHOD | html %]">Set item type</a>
             </li>
             <li>
                 <a href="#" aria-current="page">
@@ -51,8 +51,8 @@
 [%- SWITCH step -%]
 [%- CASE '1' -%]
     <form method="post">
-    <input type="hidden" name="class" value="[% CLASS %]"/>
-    <input type="hidden" name="method" value="[% METHOD %]"/>
+    <input type="hidden" name="class" value="[% CLASS | html %]"/>
+    <input type="hidden" name="method" value="[% METHOD | html %]"/>
     <input type="hidden" name="do_it" id="do_it" value="1"/>
     <fieldset class="rows">
         <ol>
