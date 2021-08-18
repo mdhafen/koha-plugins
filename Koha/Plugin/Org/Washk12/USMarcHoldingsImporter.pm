@@ -12,7 +12,7 @@ use MARC::Record;
 use C4::Context;
 
 ## Here we set our plugin version
-our $VERSION = "1.0.1";
+our $VERSION = "1.0.2";
 
 ## Here is our metadata, some keys are required, some are optional
 our $metadata = {
@@ -96,14 +96,7 @@ sub to_marc {
             unless ( $type && grep { $_->{'itemtype'} eq $type } @$itemtypes ) {
                 $type = undef;
             }
-
-            # check barcode is unique
-            #  FIXME - I'm adding homebranch to this barcode search because
-            #   of something on my fork of Koha.  You probably don't want
-            #   to do that!
-            if ( my $item = Koha::Items->find({ barcode => $bar, homebranch => C4::Context->userenv->{'branch'} }) ) {
-                $bar = undef;
-            }
+            # Don't validate barcode being unique, that is already handled
 
             push( @fields, 'a' => $homeb ) if ( $homeb );
             push( @fields, 'b' => $holdb ) if ( $holdb );
