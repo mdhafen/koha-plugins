@@ -51,6 +51,8 @@
 [%- SWITCH step -%]
 [%- CASE '1' -%]
     <form method="post">
+    <input type="hidden" name="class" value="[% CLASS %]"/>
+    <input type="hidden" name="method" value="[% METHOD %]"/>
     <input type="hidden" name="do_it" id="do_it" value="1"/>
     <fieldset class="rows">
         <ol>
