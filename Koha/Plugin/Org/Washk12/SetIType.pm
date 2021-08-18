@@ -1,4 +1,4 @@
-package Koha::Plugin::Org::Washk12::MassMessageTool;
+package Koha::Plugin::Org::Washk12::SetIType;
 
 ## It's good practive to use Modern::Perl
 use Modern::Perl;
@@ -13,9 +13,9 @@ our $VERSION = "1.0.0";
 
 ## Here is our metadata, some keys are required, some are optional
 our $metadata = {
-    name   => 'Mass Message Tool',
+    name   => 'Set Item iType tool',
     author => 'Michael Hafen',
-    description => 'This tool plugin sends messages to patrons en-mass',
+    description => 'This tool plugin sets the item type on items that don\'t have it based on their call number',
     date_authored   => '2021-08-09',
     date_updated    => '2021-08-09',
     minimum_version => undef,
