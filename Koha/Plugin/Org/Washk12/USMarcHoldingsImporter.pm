@@ -7,12 +7,12 @@ use Modern::Perl;
 use base qw(Koha::Plugins::Base);
 
 ## We will also need to include any Koha libraries we want to access
-use MARC::Batch;
 use MARC::Record;
 use C4::Context;
+use C4::Charset qw{MarcToUTF8Record};
 
 ## Here we set our plugin version
-our $VERSION = "1.0.2";
+our $VERSION = "1.0.3";
 
 ## Here is our metadata, some keys are required, some are optional
 our $metadata = {
@@ -56,12 +56,10 @@ sub to_marc {
     my ( $self, $args ) = @_;
 
     my $data = $args->{data};
-    open( my $DATA, '<', \$data );    # Mock a file handle
-
-    my $batch = MARC::Batch->new( 'USMARC', $DATA );
     my $modified_batch = q{};
 
-    while ( my $record = $batch->next() ) {
+    foreach my $text ( split "\035", $data ) {
+        my ($record) = MarcToUTF8Record($text,C4::Context->preference('marcflavour'),'UTF-8');
         my @field_852 = $record->field('852');
 
         foreach my $field_852 (@field_852) {
@@ -72,7 +70,7 @@ sub to_marc {
             $holdb = $field_852->subfield('b') || C4::Context->userenv->{'branch'};
             $call = join(q{ }, $field_852->subfield('k'), $field_852->subfield('h'), $field_852->subfield('i'), $field_852->subfield('m') ) || $record->subfield('090','a');
             $price = $field_852->subfield('9') || $field_852->subfield('r');
-            $price =~ s/[^\d\.]//g;
+            $price =~ s/[^\d\.]//g if ($price);
             $bar = $field_852->subfield('p');
             $notes = join('|',$field_852->subfield('z'));
             $urls = join('|',$field_852->subfield('u'));
