@@ -58,9 +58,27 @@ sub to_marc {
     my $data = $args->{data};
     my $modified_batch = q{};
 
+    my $libraries_filter = {};
+    if ( C4::Context->only_my_library() ) {
+        $libraries_filter->{'branchcode'} = C4::Context->userenv->{'branch'};
+    }
+    my $libraries = Koha::Libraries->search($libraries_filter)->unblessed;
+    my $itemtypes = Koha::ItemTypes->search_with_localization($libraries_filter)->unblessed;
+
     foreach my $text ( split "\035", $data ) {
         my ($record) = MarcToUTF8Record($text,C4::Context->preference('marcflavour'),'UTF-8');
         my @field_852 = $record->field('852');
+        my $type = $record->subfield('942','c') || undef;
+        # validate item type
+        unless ( $type && grep { $_->{'itemtype'} eq $type } @$itemtypes ) {
+            $type = undef;
+        }
+
+        # remove Koha fields: 942, 952, 999
+        foreach my $field ( '942', '952', '999' ) {
+            my @koha_fields = $record->field($field);
+            $record->delete_fields(@koha_fields) if ( @koha_fields );
+        }
 
         foreach my $field_852 (@field_852) {
             my ( $homeb, $holdb, $call, $price ) = ('','','',0);
@@ -74,25 +92,13 @@ sub to_marc {
             $bar = $field_852->subfield('p');
             $notes = join('|',$field_852->subfield('z'));
             $urls = join('|',$field_852->subfield('u'));
-            $type = $record->subfield('942','c');
 
             # validate branchcode for home and holding branch
-            my $libraries_filter = {};
-            if ( C4::Context->only_my_library() ) {
-                $libraries_filter->{'branchcode'} = C4::Context->userenv->{'branch'};
-            }
-            my $libraries = Koha::Libraries->search($libraries_filter)->unblessed;
             unless ( $homeb && grep { $_->{'branchcode'} eq $homeb } @$libraries ) {
                 $homeb = C4::Context->userenv->{'branch'} || undef;
             }
             unless ( $holdb && grep { $_->{'branchcode'} eq $holdb } @$libraries ) {
                 $holdb = C4::Context->userenv->{'branch'} || undef;
-            }
-
-            # validate item type
-            my $itemtypes = Koha::ItemTypes->search_with_localization($libraries_filter)->unblessed;
-            unless ( $type && grep { $_->{'itemtype'} eq $type } @$itemtypes ) {
-                $type = undef;
             }
             # Don't validate barcode being unique, that is already handled
 
