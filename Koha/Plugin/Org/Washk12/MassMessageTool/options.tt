@@ -1,0 +1,232 @@
+[% USE raw %]
+[% USE Asset %]
+[% SET footerjs = 1 %]
+[% USE Branches %]
+[% USE Categories %]
+[% PROCESS 'html_helpers.inc' %]
+
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Send a message to patrons &rsaquo; Tools &rsaquo; Koha</title>
+[% INCLUDE 'doc-head-close.inc' %]
+[% Asset.css("css/humanmsg.css") | $raw %]
+</head>
+<body id="tools_mass_notice" class="tools">
+    [% INCLUDE 'header.inc' %]
+    [% INCLUDE 'patron-search.inc' %]
+
+    <nav id="breadcrumbs" aria-label="Breadcrumb" class="breadcrumb">
+        <ol>
+            <li>
+                <a href="/cgi-bin/koha/mainpage.pl">Home</a>
+            </li>
+            <li>
+                <a href="/cgi-bin/koha/tools/tools-home.pl">Tools</a>
+            </li>
+            <li>
+                <a href="#" aria-current="page">Send a message to patrons</a>
+            </li>
+        </ol>
+    </nav>
+
+    <div class="main container-fluid">
+        <div class="row">
+            <div class="col-sm-10 col-sm-push-2">
+                <main>
+                    <h1>Send a message to patrons</h1>
+
+    <form method="post">
+        <input type="hidden" name="class" value="[% CLASS %]"/>
+        <input type="hidden" name="method" value="[% METHOD %]"/>
+        <input type="hidden" name="do_it" value="[% step %]"/>
+
+        <fieldset class="rows">
+            <legend>Options</legend>
+            <ol>
+			    <li>
+			        <label for="send_to">Send to patrons: </label>
+			        <select id="send_to" name="send_to">
+                        <option value="">Default email address</option>
+                        <option value="home">Home address</option>
+                        <option value="work">Work (Students district email) address</option>
+                        <option value="both">Both home and work addresses</option>
+                    </select>
+                </li>
+            </ol>
+        </fieldset>
+
+        <fieldset class="rows">
+            <legend>Search</legend>
+            <ol>
+                <li>
+                    <label for="category">Patron category: </label>
+                    [% SET categories = Categories.all() %]
+                    <select name="category" id="category">
+                        <option value="">Any</option>
+                        [% FOREACH category IN categories %]
+                            [% IF category.categorycode == categorycode_filter %]
+                        <option value="[% category.categorycode | html %]" selected="selected">[% category.description | html %]</option>
+                            [% ELSE %]
+                        <option value="[% category.categorycode | html %]">[% category.description | html %]</option>
+                            [% END %]
+                        [% END %]
+                    </select>
+                </li>
+                <li>
+                    <label for="branch">Patron branch: </label>
+                    <select id="branch" name="branch">
+                    [% IF Branches.InIndependentBranchesMode() %]
+                        [% PROCESS options_for_libraries libraries => Branches.all( search_params => { branchcode => Branches.GetLoggedInBranchcode() }, selected => Branches.GetLoggedInBranchcode() ) %]
+                    [% ELSE %]
+                        <option value="">Any</option>
+                        [% PROCESS options_for_libraries libraries => Branches.all( selected => Branches.GetLoggedInBranchcode() ) %]
+                    [% END %]
+                    </select>
+			    </li>
+			    <li>
+			        <label for="issues">Books checked out: </label>
+			        <select id="issues" name="issues">
+                        <option value="">Don't consider check outs</option>
+                        <option value="today">Book(s) due today</option>
+                        <option value="overdue">Book(s) overdue</option>
+                    </select>
+                </li>
+			    <li>
+			        <label for="fines">(OR) Fines: </label>
+			        <select id="fines" name="fines">
+                        <option value="">Don't consider fines</option>
+                        <option value="fines">Fines</option>
+                    </select>
+                </li>
+	        </ol>
+	    </fieldset>
+
+        <fieldset class="rows">
+            <legend>Message</legend>
+            <ol>
+                <li>
+			        <label for="message-subject">Subject: </label>
+                    <input type="text" size="60" id="message-subject" name="message-subject">
+                </li>
+                <li>
+			        <label for="message-content">Message: </label>
+                    <table>
+                        <tr>
+                            <td>
+                                <select name="SQLfieldname" id="SQLfieldname" multiple="multiple" size="9">
+                                    [% FOREACH table IN tables %]
+                                    <optgroup label="[% table | html %]">
+                                    [% FOREACH SQLfieldname IN sql_fields.$table %]
+                                    <option value="[% SQLfieldname.value | html %]">[% SQLfieldname.text | html %]</option>
+                                    [% END %]
+                                    </optgroup>
+                                    [% END %]
+                                </select>
+
+                                <button type="button" class="btn btn-default btn-sm insert">Insert <i class="fa fa-long-arrow-right"></i></button>
+                            </td>
+                            <td>
+                                <textarea id="message-content" name="message-content" class="content_email" cols="80" rows="15"></textarea>
+                            </td>
+                            <td>
+                                <select name="letter_module" id="letter_module">
+                                    <option>Select a module</option>
+                                    <option value="accounts">Accounts (fines)</option>
+                                    <option value="circulation">Circulation (overdues)</option>
+                                </select>
+                                [% FOREACH module IN [ 'accounts', 'circulation' ] %]
+                                <select name="[% module %]_letters" id="[% module %]_letters" style="display:none">
+                                <optgroup label="default">
+                                [% FOREACH let IN letters.$module.default %]
+                                <option value="[% let.code | html %]" data-subject="[% let.title | html %]" data-content="[% let.content | html %]">[% let.name | html %]</option>
+                                [% END %]
+                                </optgroup>
+                                [% FOREACH branch IN letters.$module.specific.keys.sort %]
+                                <optgroup label="[% branch | html %]">
+                                [% FOREACH let IN letters.$module.specific.$branch %]
+                                <option value="[% let.code | html %]" data-subject="[% let.title | html %]" data-content="[% let.content | html %]">[% let.name | html %]</option>
+                                [% END %]
+                                </optgroup>
+                                [% END %]
+                                </select>
+                                [% END %]
+                            <div class="help"><p>Selecting a preset will overwrite the current subject and message.</p></div>
+                            </td>
+                        </tr>
+                    </table>
+                </li>
+            </ol>
+        </fieldset>
+
+        <fieldset class="action">
+            <input type="submit" name="op" value="Search" class="button" />
+            <a href="/cgi-bin/koha/tools/tools-home.pl" class="cancel">Cancel</a>
+        </fieldset>
+    </form>
+
+                </main>
+            </div>
+            <div class="col-sm-2 col-sm-pull-10">
+                <aside>
+                    [% INCLUDE 'tools-menu.inc' %]
+                </aside>
+            </div> <!-- /.col-sm-2.col-sm-pull-10 -->
+        </div> <!-- /.row -->
+
+[% MACRO jsinclude BLOCK %]
+    [% Asset.js("js/tools-menu.js") | $raw %]
+    [% Asset.js("lib/jquery/plugins/humanmsg.js") | $raw %]
+    [% Asset.js("lib/jquery/plugins/jquery.insertatcaret.js") | $raw %]
+
+<script>
+$(document).ready(function() {
+    $(".insert").on("click",function(){
+        insertValueQuery();
+    });
+    function insertValueQuery() {
+        var myQuery = $('textarea[name="message-content"]');
+        var myListBox = $('select[name="SQLfieldname"]');
+
+        if($(myListBox).find('option').length > 0) {
+            $(myListBox).find('option').each( function (){
+                if ( $(this).attr('selected') && $(this).val().length > 0 ) {
+                    $(myQuery).insertAtCaret("<<" + $(this).val() + ">>");
+                }
+            });
+        }
+    }
+
+/*
+  FIXME wire preset selects here.
+*/
+    $("#letter_module").on("change",function(e){
+        var module = $(this).val();
+        var acc_drop = $("#accounts_letters");
+        var circ_drop = $("#circulation_letters");
+        if ( module == 'accounts' ) {
+            acc_drop.toggle(true);
+            circ_drop.toggle(false);
+        }
+        if ( module == 'circulation' ) {
+            circ_drop.toggle(true);
+            acc_drop.toggle(false);
+        }
+    });
+    $("#accounts_letters").on("change",function(e){
+        var opt = $( "option:selected", this );
+        var subj = opt.data('subject');
+        var mess = opt.data('content');
+        $('#message-subject').val(subj);
+        $('#message-content').val(mess);
+    });
+    $("#circulation_letters").on("change",function(e){
+        var opt = $( "option:selected", this );
+        var subj = opt.data('subject');
+        var mess = opt.data('content');
+        $('#message-subject').val(subj);
+        $('#message-content').val(mess);
+    });
+});
+</script>
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]
