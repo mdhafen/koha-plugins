@@ -227,7 +227,7 @@ sub send_messages {
     my @borrowers = $input->multi_param('borrowers');
     my $admin_address = C4::Context->preference('KohaAdminEmailAddress');
     my %branch_map = map { $_->{branchcode} => $_ } @{ Koha::Libraries->search()->unblessed };
-    my $item_content_fields = [ 'date_due', 'title', 'author', 'barcode' ];
+    my $item_content_fields = [ 'date_due', 'title', 'author', 'barcode', 'replacementprice' ];
     my $fine_content_fields = [ 'date', 'amountoutstanding', 'description', 'barcode', 'title'];
     my ( $items_content, $overdue_content, $fines_content );
 
