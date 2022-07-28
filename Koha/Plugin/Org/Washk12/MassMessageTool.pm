@@ -12,7 +12,7 @@ use Koha::Patron;
 use Koha::Library;
 
 ## Here we set our plugin version
-our $VERSION = "1.0.0";
+our $VERSION = "1.1.0";
 
 ## Here is our metadata, some keys are required, some are optional
 our $metadata = {
@@ -20,7 +20,7 @@ our $metadata = {
     author => 'Michael Hafen',
     description => 'This tool plugin sends messages to patrons en-mass',
     date_authored   => '2021-08-09',
-    date_updated    => '2021-08-09',
+    date_updated    => '2022-07-28',
     minimum_version => undef,
     maximum_version => undef,
     version         => $VERSION,
@@ -151,7 +151,7 @@ sub get_patrons {
     my $category = $input->param('category');
     my $sort1 = $input->param('sort1');
     my $sort2 = $input->param('sort2');
-    my $issues = $input->param('issues');  # ''|today|overdue
+    my $issues = $input->param('issues');  # ''|all|today|overdue
     my $fines = $input->param('fines');  # ''|fines
 
     $template->param(
@@ -172,6 +172,10 @@ sub get_patrons {
         push @having, 'overdues > 0';
     }
     elsif ( $issues eq 'overdue' ) {
+        push @having, 'overdues > 0';
+    }
+    elsif ( $issues eq 'all' ) {
+        $overdue_select = ', (SELECT COUNT(*) FROM issues WHERE issues.borrowernumber = borrowers.borrowernumber) AS overdues';
         push @having, 'overdues > 0';
     }
 

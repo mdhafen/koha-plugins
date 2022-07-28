@@ -86,6 +86,7 @@
 			        <label for="issues">Books checked out: </label>
 			        <select id="issues" name="issues">
                         <option value="">Don't consider check outs</option>
+                        <option value="all">Book(s) checked out</option>
                         <option value="today">Book(s) due today</option>
                         <option value="overdue">Book(s) overdue</option>
                     </select>
