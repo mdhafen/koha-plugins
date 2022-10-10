@@ -153,14 +153,25 @@ sub get_patrons {
     my $sort2 = $input->param('sort2');
     my $issues = $input->param('issues');  # ''|all|today|overdue
     my $fines = $input->param('fines');  # ''|fines
+    my $send_to = $input->param('send_to');  # ''|home|work|both
 
     $template->param(
         step => 2,
         subject => scalar $input->param('message-subject'),
         body => scalar $input->param('message-content'),
-        send_to => scalar $input->param('send_to'),  # ''|home|work|both
+        send_to => scalar $send_to,
         issues => $issues,
     );
+
+    my $email_column = 'email';
+    if ( $send_to eq 'work' ) {
+        $email_column = 'emailpro AS email';
+    }
+    elsif ( $send_to eq 'both' ) {
+        $email_column = 'CONCAT_WS(",",email,emailpro) AS email';
+    }
+    else {
+    }
 
     my @borrowers;
     my @wheres;
@@ -201,7 +212,7 @@ sub get_patrons {
         push @params, $sort2;
     }
 
-    my $query = "SELECT borrowernumber,surname,firstname,sort1,sort2,description $account_select $overdue_select FROM borrowers LEFT JOIN categories USING (categorycode)";
+    my $query = "SELECT borrowernumber,surname,firstname,sort1,sort2,description,$email_column $account_select $overdue_select FROM borrowers LEFT JOIN categories USING (categorycode)";
     $query .= ' WHERE '. ( join ' AND ', @wheres ) if (@wheres);
     $query .= ' GROUP BY borrowernumber';
     $query .= ' HAVING '. ( join ' OR ', @having ) if (@having);
@@ -210,6 +221,7 @@ sub get_patrons {
     $sth->execute( @params );
     while ( my $row = $sth->fetchrow_hashref() ) {
         $row->{'account'} = sprintf( "%.2f", $row->{'account'} || 0 );
+        $row->{'overdues'} += 0;
         push @borrowers, $row;
     }
 

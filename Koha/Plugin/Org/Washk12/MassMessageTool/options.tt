@@ -122,6 +122,8 @@
                                     </optgroup>
                                     [% END %]
                                 </select>
+                            </td>
+                            <td class="actions">
 
                                 <button type="button" class="btn btn-default btn-sm insert">Insert <i class="fa fa-long-arrow-right"></i></button>
                             </td>
@@ -129,6 +131,7 @@
                                 <textarea id="message-content" name="message-content" class="content_email" cols="80" rows="15"></textarea>
                             </td>
                             <td>
+                                <p>Copy from a notice:</p>
                                 <select name="letter_module" id="letter_module">
                                     <option>Select a module</option>
                                     <option value="accounts">Accounts (fines)</option>
@@ -183,18 +186,6 @@ $(document).ready(function() {
     $(".insert").on("click",function(){
         insertValueQuery();
     });
-    function insertValueQuery() {
-        var myQuery = $('textarea[name="message-content"]');
-        var myListBox = $('select[name="SQLfieldname"]');
-
-        if($(myListBox).find('option').length > 0) {
-            $(myListBox).find('option').each( function (){
-                if ( $(this).attr('selected') && $(this).val().length > 0 ) {
-                    $(myQuery).insertAtCaret("<<" + $(this).val() + ">>");
-                }
-            });
-        }
-    }
 
 /*
   FIXME wire preset selects here.
@@ -227,6 +218,19 @@ $(document).ready(function() {
         $('#message-content').val(mess);
     });
 });
+
+function insertValueQuery() {
+    var myQuery = $('textarea[name="message-content"]');
+    var myListBox = $('select[name="SQLfieldname"]');
+
+    if($(myListBox).find('option').length > 0) {
+        $(myListBox).find('option').each( function (){
+            if ( $(this).prop('selected') && $(this).val().length > 0 ) {
+                $(myQuery).insertAtCaret("<<" + $(this).val() + ">>");
+            }
+        });
+    }
+}
 </script>
 [% END %]
 

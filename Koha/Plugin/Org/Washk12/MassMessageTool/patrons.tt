@@ -50,10 +50,10 @@
                 <fieldset class="rows">
                     <legend>Select patrons</legend>
                     <table id="patronTable">
-                    <thead><tr><th class="noSort"></th><th>Name</th><th>Category</th><th>sort1</th><th>sort2</th><th>account balance</th><th>[% IF issues == 'today'; 'Due'; ELSE; 'Overdues'; END %]</th></tr></thead>
+                    <thead><tr><th class="noSort"></th><th>Name</th><th>Category</th><th>sort1</th><th>sort2</th><th>Email</th><th>account balance</th><th>[% IF issues == 'today'; 'Due'; ELSE; 'Overdues'; END %]</th></tr></thead>
                     <tbody>
                     [% FOREACH pat IN patrons %]
-                    <tr><td><input type="checkbox" checked="checked" name="borrowers" id="borrowers_[% pat.borrowernumber %]" value="[% pat.borrowernumber %]"></td><td>[% name = [ pat.surname, pat.firstname ]; name.grep('\w+').join(', ') | html %]</td><td>[% pat.description | html %]</td><td>[% pat.sort1 | html %]</td><td>[% pat.sort2 | html %]</td><td>[% pat.account %]</td><td>[% pat.overdues %]</td></tr>
+                    <tr><td><input type="checkbox" checked="checked" name="borrowers" id="borrowers_[% pat.borrowernumber %]" value="[% pat.borrowernumber %]"></td><td>[% name = [ pat.surname, pat.firstname ]; name.grep('\w+').join(', ') | html %]</td><td>[% pat.description | html %]</td><td>[% pat.sort1 | html %]</td><td>[% pat.sort2 | html %]</td><td>[% pat.email | html %]</td><td>[% pat.account %]</td><td>[% pat.overdues %]</td></tr>
                     [% END %]
                     </tbody>
                     </table>
