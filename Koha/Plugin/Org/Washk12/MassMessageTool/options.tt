@@ -55,7 +55,7 @@
         </fieldset>
 
         <fieldset class="rows">
-            <legend>Search</legend>
+            <legend>Filter</legend>
             <ol>
                 <li>
                     <label for="category">Patron category: </label>
@@ -85,7 +85,7 @@
 			    <li>
 			        <label for="issues">Books checked out: </label>
 			        <select id="issues" name="issues">
-                        <option value="">Don't consider check outs</option>
+                        <option value="">Don't filter on check outs</option>
                         <option value="all">Book(s) checked out</option>
                         <option value="today">Book(s) due today</option>
                         <option value="overdue">Book(s) overdue</option>
@@ -94,7 +94,7 @@
 			    <li>
 			        <label for="fines">(OR) Fines: </label>
 			        <select id="fines" name="fines">
-                        <option value="">Don't consider fines</option>
+                        <option value="">Don't filter on fines</option>
                         <option value="fines">Fines</option>
                     </select>
                 </li>
