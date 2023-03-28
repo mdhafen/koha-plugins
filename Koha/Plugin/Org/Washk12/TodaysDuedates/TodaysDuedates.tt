@@ -1,0 +1,79 @@
+[% USE raw %]
+[% USE KohaDates %]
+[% USE Asset %]
+[% SET footerjs = 1 %]
+[% USE Branches %]
+[% PROCESS 'html_helpers.inc' %]
+
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Todays due dates &rsaquo; Tools &rsaquo; Koha</title>
+[% INCLUDE 'doc-head-close.inc' %]
+[% Asset.css("css/humanmsg.css") | $raw %]
+</head>
+<body id="tools_todays_duedates" class="tools">
+    [% INCLUDE 'header.inc' %]
+    [% INCLUDE 'patron-search.inc' %]
+
+    <nav id="breadcrumbs" aria-label="Breadcrumb" class="breadcrumb">
+        <ol>
+            <li>
+                <a href="/cgi-bin/koha/mainpage.pl">Home</a>
+            </li>
+            <li>
+                <a href="/cgi-bin/koha/tools/tools-home.pl">Tools</a>
+            </li>
+            <li>
+                <a href="#" aria-current="page">Todays due dates</a>
+            </li>
+        </ol>
+    </nav>
+
+    <div class="main container-fluid">
+        <div class="row">
+            <div class="col-sm-10 col-sm-push-2">
+                <main>
+                    <h1>Todays due dates</h1>
+                    <form method="post">
+                        <fieldset class="rows">
+                            <input type="hidden" name="class" value="[% CLASS %]"/>
+                            <input type="hidden" name="method" value="[% METHOD %]"/>
+                            <ol>
+                                <li>
+                                    <label for="branch">Select a library:</label>
+                                    <select name="branch" id="branch">
+                                        [% PROCESS options_for_libraries libraries => Branches.all( selected => branch ) %]
+                                    </select>
+                                    <button type="submit">
+                                        <i class="fa fa-arrow-right"></i>
+                                    </button>
+                                </li>
+                            </ol>
+                        </fieldset>
+                    </form>
+
+                    <fieldset>
+                        <table>
+                            <tr><th>Patron category</th><th>Item type</th><th>Check out Due date</th><th>Renewal Due date</th></tr>
+                            <tbody>
+                            [% FOREACH rule IN rules %]
+                            <tr><td>[% rule.categoryname | html %]</td><td>[% rule.itemtypename | html %]</td><td>[% rule.issuelength | $KohaDates %]</td><td>[% rule.renewalperiod | $KohaDates %]</td></tr>
+                            [% END %]
+                            </tbody>
+                        </table>
+                    </fieldset>
+                </main>
+            </div>
+            <div class="col-sm-2 col-sm-pull-10">
+                <aside>
+                    [% INCLUDE 'tools-menu.inc' %]
+                </aside>
+            </div> <!-- /.col-sm-2.col-sm-pull-10 -->
+        </div> <!-- /.row -->
+
+[% MACRO jsinclude BLOCK %]
+    [% Asset.js("js/tools-menu.js") | $raw %]
+    [% Asset.js("lib/jquery/plugins/humanmsg.js") | $raw %]
+    [% Asset.js("lib/jquery/plugins/jquery.insertatcaret.js") | $raw %]
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]
