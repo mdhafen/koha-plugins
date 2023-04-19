@@ -20,8 +20,8 @@ our $metadata = {
     author => 'Michael Hafen',
     description => 'This tool plugin displays the effective due dates for today for any patron category and item type with an issue length set.',
     date_authored   => '2023-03-28',
-    date_updated    => '2023-03-28',
-    minimum_version => undef,
+    date_updated    => '2023-04-19',
+    minimum_version => 22.1104, ## min because of staff interface redesign
     maximum_version => undef,
     version         => $VERSION,
 };

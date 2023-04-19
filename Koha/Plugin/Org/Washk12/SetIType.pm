@@ -17,8 +17,8 @@ our $metadata = {
     author => 'Michael Hafen',
     description => 'This tool plugin sets the item type on items that don\'t have it based on their call number',
     date_authored   => '2021-08-09',
-    date_updated    => '2021-08-09',
-    minimum_version => undef,
+    date_updated    => '2023-04-19',
+    minimum_version => 22.1104, ## min because of staff interface redesign
     maximum_version => undef,
     version         => $VERSION,
 };
