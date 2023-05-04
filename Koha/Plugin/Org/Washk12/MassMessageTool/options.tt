@@ -10,7 +10,7 @@
 [% INCLUDE 'doc-head-close.inc' %]
 [% Asset.css("css/humanmsg.css") | $raw %]
 </head>
-<body id="tools_mass_notice" class="tools">
+<body id="plugin_mass_notice" class="tools">
     [% WRAPPER 'header.inc' %]
         [% INCLUDE 'patron-search-header.inc' %]
     [% END %]

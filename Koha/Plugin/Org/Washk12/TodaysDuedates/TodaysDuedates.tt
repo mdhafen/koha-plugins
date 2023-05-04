@@ -10,7 +10,7 @@
 [% INCLUDE 'doc-head-close.inc' %]
 [% Asset.css("css/humanmsg.css") | $raw %]
 </head>
-<body id="tools_todays_duedates" class="tools">
+<body id="plugin_todays_duedates" class="tools">
     [% WRAPPER 'header.inc' %]
         [% INCLUDE 'circ-search.inc' %]
     [% END %]
