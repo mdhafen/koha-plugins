@@ -66,7 +66,7 @@ sub to_marc {
     my $itemtypes = Koha::ItemTypes->search_with_localization($libraries_filter)->unblessed;
 
     foreach my $text ( split "\035", $data ) {
-        my ($record) = MarcToUTF8Record($text,C4::Context->preference('marcflavour'),'UTF-8');
+        my ($record) = MarcToUTF8Record($text,C4::Context->preference('marcflavour'),'');
         my @field_852 = $record->field('852');
         my $type = $record->subfield('942','c') || undef;
         # validate item type
