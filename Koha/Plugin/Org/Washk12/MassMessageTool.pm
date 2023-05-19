@@ -127,8 +127,8 @@ sub show_options {
     # calculated fields
     push @tables, 'calculated';
     $sql_fields{'calculated'} = [
-        { value => 'items.content', text => 'checked out titles' },
-        { value => 'overdues.content', text => 'overdue titles' },
+        { value => 'issues.content', text => 'checked out titles' },
+        { value => 'items.content', text => 'overdue titles' },
         { value => 'fines.content', text => 'fines' },
     ];
 
@@ -281,10 +281,11 @@ END_SQL
         }
         $issues_sth->execute($borrowernumber);
         while ( my $item_info = $issues_sth->fetchrow_hashref() ) {
+            my $item_content = C4::Letters::get_item_content( { item => $item_info, item_content_fields => $item_content_fields } );
             if ( $item_info->{'days_to_due'} < 0 ) {
-                $overdue_content .= C4::Letters::get_item_content( { item => $item_info, item_content_fields => $item_content_fields } );
+                $overdue_content .= $item_content;
             }
-            $items_content .= C4::Letters::get_item_content( { item => $item_info, item_content_fields => $item_content_fields } );
+            $items_content .= $item_content;
         }
 
         $fines_sth->execute($borrowernumber);
@@ -294,8 +295,8 @@ END_SQL
         }
 
         my $substitute = {
-            'items.content' => $items_content,
-            'overdues.content' => $overdue_content,
+            'issues.content' => $items_content,
+            'items.content' => $overdue_content,
             'fines.content' => $fines_content,
         };
         my $table_params = {
