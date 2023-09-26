@@ -87,6 +87,23 @@
         </ol>
     </fieldset>
 
+    <h3>Or</h3>
+
+    <fieldset class="rows">
+        <ol>
+            <li>
+                <label for="do_common">Perform common operations</label>
+                <input type="checkbox" name="do_common" id="do_common">
+            </li>
+        </ol>
+        <div class="help">
+            <h3>Common operations:</h3>
+            [%- FOREACH c_op IN common_ops %]
+            <div class="hint">[% c_op.description %]</div>
+            [%- END %]
+        </div>
+    </fieldset>
+
     <fieldset class="action">
         <input type="submit" name="op" value="Submit" class="button" />
         <a href="/cgi-bin/koha/tools/tools-home.pl" class="cancel">Cancel</a>

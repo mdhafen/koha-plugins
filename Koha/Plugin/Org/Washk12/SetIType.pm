@@ -48,11 +48,60 @@ sub tool {
     my ( $self, $args ) = @_;
     my $input = $self->{'cgi'};
     my $step = $input->param('do_it') || 0;
+
+    my $common_transforms = [
+        {
+            description => '2 or 3 digits to Non-fiction',
+            new_itype => 'NF',
+            search => '\s*\d{2,3}',
+        },
+        {
+            description => 'B to Non-fiction',
+            new_itype => 'NF',
+            search => '\s*B\s+',
+        },
+        {
+            description => 'F or FIC to Fiction',
+            new_itype => 'F',
+            search => '\s*(?:F\s+|FIC)',
+        },
+        {
+            description => 'E or EASY to Easy',
+            new_itype => 'EASY',
+            search => '\s*(?:E\s+|EASY)',
+        },
+        {
+            description => 'CD to Audio CD',
+            new_itype => 'CD',
+            search => '\s*CD',
+        },
+        {
+            description => 'DVD to DVD',
+            new_itype => 'DVD',
+            search => '\s*DVD',
+        },
+        {
+            description => 'REF to Reference',
+            new_itype => 'REF',
+            search => '\s*REF',
+        },
+        {
+            description => 'NOV to Novel Set',
+            new_itype => 'NOV',
+            search => '\s*NOV',
+        },
+        {
+            description => 'TXT or TEXT to Text Book',
+            new_itype => 'TX',
+            search => '\s*TE?XT',
+        },
+    ];
+
     unless ( $step ) {
-        $self->show_options();
+        $self->show_options({common_ops=>$common_transforms});
     }
     elsif ( $step = '1' ) {
-        $self->show_results();
+        $self->show_results({common_ops=>$common_transforms});
     }
     else {
         print $input->redirect('/cgi-bin/koha/tools/tools-home.pl');
@@ -65,6 +114,7 @@ sub show_options {
     my $input = $self->{'cgi'};
     my $template = $self->get_template( { file => 'setitype.tt' } );
     $template->param( step => 1 );
+    $template->param( common_ops => $args->{common_ops} );
 
     $self->output_html( $template->output() );
 }
@@ -78,15 +128,23 @@ sub show_results {
     $template->param( step => 2 );
 
     my (@items,$changed_items,$changed_bibs);
-    my ($search,$new_itype,$old_itype,$backport);
+    my ($search,$new_itype,$old_itype,$backport,$do_common);
     my $branch = $input->param('branch');
     $branch = ( C4::Context->only_my_library() ? C4::Context->userenv->{branch} : $branch );
     $search = $input->param('callnumber');
     $new_itype = $input->param('itype');
     $old_itype = $input->param('old_itype') || undef;
     $backport = $input->param('backport') || 0;
-
+    $do_common = $input->param('do_common') || 0;
+    my @ops;
     if ( $search && $new_itype ) {
+        push @ops, { search => $search, new_itype => $new_itype };
+    }
+    if ( $do_common ) {
+        push @ops, @{$args->{common_ops}};
+    }
+
+    if ( @ops ) {
         my @params;
         my @where;
         my $query = '
@@ -111,7 +169,14 @@ SELECT i.itemnumber,i.itemcallnumber,bi.itemtype
         my $sth = $dbh->prepare($query);
         $sth->execute(@params);
         while ( my $row = $sth->fetchrow_hashref ) {
-            next unless ( $row->{'itemcallnumber'} =~ /^$search/i );
+            $new_itype = '';
+            foreach my $opts ( @ops ){
+                if ( $row->{'itemcallnumber'} =~ m/^$$opts{search}/i ) {
+                    $new_itype = $opts->{new_itype};
+                    last;
+                }
+            }
+            next unless ( $new_itype );
             my $item = Koha::Items->find( $row->{'itemnumber'} );
             $item->itype($new_itype)->store;
             $changed_items++;
