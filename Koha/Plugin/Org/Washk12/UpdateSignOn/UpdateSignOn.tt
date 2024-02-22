@@ -110,6 +110,9 @@
             <li>
                 <label for="query">Search:</label>
                 <input type="text" size="60" id="query" name="query">
+                <div class="help">
+                    <div class="hint">Enter the students login to make sure their SignOn (LDAP) account is in sync with their Google account.  The student's student number (card number) may also be entered, but the search will not be able to sync them if there is no SignOn account for them yet.</div>
+                </div>
             </li>
         </ol>
     </fieldset>
