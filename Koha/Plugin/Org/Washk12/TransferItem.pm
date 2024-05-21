@@ -13,7 +13,7 @@ use C4::Circulation qw( barcodedecode );
 use List::MoreUtils qw( uniq );
 
 ## Here we set our plugin version
-our $VERSION = "1.0.0";
+our $VERSION = "1.0.1";
 
 ## Here is our metadata, some keys are required, some are optional
 our $metadata = {
@@ -89,7 +89,7 @@ sub move_items {
     }
     @barcodes = ( uniq @barcodes );
     for my $code ( @barcodes ) {
-        my $replace = ( $code eq $barcode && $to_barcode ne $barcode );
+        my $replace = ( $to_barcode && $code eq $barcode && $to_barcode ne $barcode );
         $code = barcodedecode( $code ) if $code;
 
         my $item_filter = { barcode => $code };
@@ -111,7 +111,7 @@ sub move_items {
             }
         }
 
-        if ( $replace ) {
+        if ( $replace && $to_barcode ) {
             $item->barcode( $to_barcode );
         }
 
