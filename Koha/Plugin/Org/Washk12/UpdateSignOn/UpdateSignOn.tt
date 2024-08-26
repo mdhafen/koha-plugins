@@ -42,7 +42,7 @@
                 <main>
                     <h1>Update patrons in SignOn</h1>
 [%- IF step == 2 %]
-<div class="dialog alert">
+<div class="alert alert-warning">
 <h2>Results :</h2>
 <ul>
     <li>

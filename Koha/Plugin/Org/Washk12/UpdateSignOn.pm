@@ -13,7 +13,7 @@ use HTTP::Request::Common;
 use LWP::UserAgent;
 
 ## Here we set our plugin version
-our $VERSION = "0.0.1";
+our $VERSION = "0.0.2";
 
 ## Plugins parameters here
 our $SignOn_url = 'https://signon.washk12.org/';

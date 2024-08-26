@@ -44,7 +44,7 @@
                 <main>
                     <h1>Transfer item</h1>
 [%- IF step == 2 %]
-<div class="dialog alert">
+<div class="alert alert-warning">
 <h2>Results :</h2>
 <ul>
     <li>[% results.moved | html %] items moved.</li>
