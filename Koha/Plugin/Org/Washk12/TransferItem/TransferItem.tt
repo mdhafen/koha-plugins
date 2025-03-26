@@ -63,6 +63,8 @@
 [% END -%]
 
     <form method="post">
+    [% INCLUDE 'csrf-token.inc' %]
+    <input type="hidden" name="op" value="cud-transfer"/>
     <input type="hidden" name="class" value="[% CLASS | html %]"/>
     <input type="hidden" name="method" value="[% METHOD | html %]"/>
     <input type="hidden" name="step" id="step" value="2"/>
