@@ -13,7 +13,7 @@ use C4::Circulation qw( barcodedecode );
 use List::MoreUtils qw( uniq );
 
 ## Here we set our plugin version
-our $VERSION = "1.0.2";
+our $VERSION = "1.0.3";
 
 ## Here is our metadata, some keys are required, some are optional
 our $metadata = {
@@ -21,8 +21,8 @@ our $metadata = {
     author => 'Michael Hafen',
     description => 'This tool plugin moves items to other libraries',
     date_authored   => '2023-04-14',
-    date_updated    => '2023-04-14',
-    minimum_version => 22.1104, ## min because of staff interface redesign
+    date_updated    => '2025-03-26',
+    minimum_version => 24.0501, ## min because of csrf protection
     maximum_version => undef,
     version         => $VERSION,
 };

@@ -33,6 +33,7 @@
                     <h1>Send a message to patrons</h1>
 
     <form method="post">
+        [% INCLUDE 'csrf-token.inc' %]
         <input type="hidden" name="class" value="[% CLASS %]"/>
         <input type="hidden" name="method" value="[% METHOD %]"/>
         <input type="hidden" name="do_it" value="[% step %]"/>
@@ -160,7 +161,7 @@
         </fieldset>
 
         <fieldset class="action">
-            <input type="submit" name="op" value="Search" class="button" />
+            <input type="submit" name="op" value="cud-search" class="button" />
             <a href="/cgi-bin/koha/tools/tools-home.pl" class="cancel">Cancel</a>
         </fieldset>
     </form>
