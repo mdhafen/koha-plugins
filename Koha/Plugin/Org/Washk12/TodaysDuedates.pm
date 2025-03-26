@@ -12,7 +12,7 @@ use Koha::Patron::Category;
 use Data::Dumper;
 
 ## Here we set our plugin version
-our $VERSION = "1.0.0";
+our $VERSION = "1.0.1";
 
 ## Here is our metadata, some keys are required, some are optional
 our $metadata = {
@@ -20,8 +20,8 @@ our $metadata = {
     author => 'Michael Hafen',
     description => 'This tool plugin displays the effective due dates for today for any patron category and item type with an issue length set.',
     date_authored   => '2023-03-28',
-    date_updated    => '2023-04-19',
-    minimum_version => 22.1104, ## min because of staff interface redesign
+    date_updated    => '2025-03-26',
+    minimum_version => 25.0501, ## min because of staff interface container wrapper
     maximum_version => undef,
     version         => $VERSION,
 };

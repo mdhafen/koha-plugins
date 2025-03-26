@@ -12,7 +12,7 @@ use Koha::Patron;
 use Koha::Library;
 
 ## Here we set our plugin version
-our $VERSION = "1.1.2";
+our $VERSION = "1.1.3";
 
 ## Here is our metadata, some keys are required, some are optional
 our $metadata = {
@@ -21,7 +21,7 @@ our $metadata = {
     description => 'This tool plugin sends messages to patrons en-mass',
     date_authored   => '2021-08-09',
     date_updated    => '2025-03-26',
-    minimum_version => 24.0501, ## min because of csrf protection
+    minimum_version => 25.0501, ## min because of staff interface container wrapper
     maximum_version => undef,
     version         => $VERSION,
 };

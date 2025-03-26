@@ -13,7 +13,7 @@ use HTTP::Request::Common;
 use LWP::UserAgent;
 
 ## Here we set our plugin version
-our $VERSION = "0.0.2";
+our $VERSION = "0.0.3";
 
 ## Plugins parameters here
 our $SignOn_url = 'https://signon.washk12.org/';
@@ -26,8 +26,8 @@ our $metadata = {
     author => 'Michael Hafen',
     description => 'This tool plugin uses the SignOn api to update LDAP objects',
     date_authored   => '2024-02-22',
-    date_updated    => '2024-02-22',
-    minimum_version => 22.1104, ## min because of staff interface redesign
+    date_updated    => '2025-03-26',
+    minimum_version => 25.0501, ## min because of staff interface container wrapper
     maximum_version => undef,
     version         => $VERSION,
 };
