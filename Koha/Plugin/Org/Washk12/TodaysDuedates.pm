@@ -76,15 +76,15 @@ SELECT rule_name, rule_value, branchcode,
         if ( $row->{categorycode} ) {
             unless ( $patrons{$row->{categorycode}} ) {
                 my $cat = Koha::Patron::Categories->find( $row->{categorycode} );
-                $patrons{$row->{categorycode}} = {
+                $patrons{$row->{categorycode}} = new Koha::Patron({
                     categorycode => $row->{categorycode},
                     dateexpiry => $cat->get_expiry_date(),
-                }
+                });
             }
             $pat = $patrons{$row->{categorycode}};
         }
         else {
-            $pat = { categorycode => $row->{categorycode} };
+            $pat = new Koha::Patron;
         }
 
         my $datedue;
