@@ -12,7 +12,7 @@ use C4::Context;
 use C4::Charset qw{MarcToUTF8Record};
 
 ## Here we set our plugin version
-our $VERSION = "1.0.3";
+our $VERSION = "1.0.4";
 
 ## Here is our metadata, some keys are required, some are optional
 our $metadata = {
@@ -74,8 +74,9 @@ sub to_marc {
             $type = undef;
         }
 
-        # remove Koha fields: 942, 952, 999
-        foreach my $field ( '942', '952', '999' ) {
+        # Assume records are not from koha, remove Koha fields: 952, 999
+        #  Keep the 942 (942$c : default item type is still useful if set)
+        foreach my $field ( '952', '999' ) {
             my @koha_fields = $record->field($field);
             $record->delete_fields(@koha_fields) if ( @koha_fields );
         }
