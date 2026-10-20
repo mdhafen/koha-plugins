@@ -1,6 +1,6 @@
 package Koha::Plugin::Org::Washk12::USMarcHoldingsImporter;
 
-## It's good practive to use Modern::Perl
+## It's good practice to use Modern::Perl
 use Modern::Perl;
 
 ## Required for all plugins
@@ -12,7 +12,7 @@ use C4::Context;
 use C4::Charset qw{MarcToUTF8Record};
 
 ## Here we set our plugin version
-our $VERSION = "1.0.3";
+our $VERSION = "1.0.5";
 
 ## Here is our metadata, some keys are required, some are optional
 our $metadata = {
@@ -20,7 +20,7 @@ our $metadata = {
     author => 'Michael Hafen',
     description => 'This plugin creates Koha compatible MARC records from USMARC records with 852 holdings.',
     date_authored   => '2021-05-06',
-    date_updated    => '2021-08-17',
+    date_updated    => '2026-10-20',
     minimum_version => undef,
     maximum_version => undef,
     version         => $VERSION,
@@ -60,10 +60,13 @@ sub to_marc {
 
     my $libraries_filter = {};
     if ( C4::Context->only_my_library() ) {
-        $libraries_filter->{'branchcode'} = C4::Context->userenv->{'branch'};
+        $libraries_filter->{'-or'} = [
+            'branchcode' => C4::Context->userenv->{'branch'},
+            'branchcode' => undef,
+        ];
     }
     my $libraries = Koha::Libraries->search($libraries_filter)->unblessed;
-    my $itemtypes = Koha::ItemTypes->search_with_localization($libraries_filter)->unblessed;
+    my $itemtypes = Koha::ItemTypes->search_with_localization($libraries_filter,{'join'=>['itemtypes_branches']})->unblessed;
 
     foreach my $text ( split "\035", $data ) {
         my ($record) = MarcToUTF8Record($text,C4::Context->preference('marcflavour'),'');
