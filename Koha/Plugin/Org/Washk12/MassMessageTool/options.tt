@@ -59,11 +59,7 @@
                     <select name="category" id="category">
                         <option value="">Any</option>
                         [% FOREACH category IN categories %]
-                            [% IF category.categorycode == categorycode_filter %]
-                        <option value="[% category.categorycode | html %]" selected="selected">[% category.description | html %]</option>
-                            [% ELSE %]
                         <option value="[% category.categorycode | html %]">[% category.description | html %]</option>
-                            [% END %]
                         [% END %]
                     </select>
                 </li>
@@ -78,6 +74,35 @@
                     [% END %]
                     </select>
 			    </li>
+                <li>
+                    <label for="sort1">Sort1: </label>
+                    <select id="sort1" name="sort1">
+                        <option value="">Any</option>
+                        [% FOREACH sort IN sort1 %]
+                        <option value="[% sort.sort1 | html %]">[% sort.sort1 | html %]</option>
+                        [% END %]
+                    </select>
+                </li>
+                <li>
+                    <label for="sort2">Sort2: </label>
+                    <select id="sort2" name="sort2">
+                        <option value="">Any</option>
+                        [% FOREACH sort IN sort2 %]
+                        <option value="[% sort.sort2 | html %]">[% sort.sort2 | html %]</option>
+                        [% END %]
+                    </select>
+                </li>
+                <li>
+                    <label for="patron_list">Patron list: </label>
+                    <select id="patron_list" name="patron_list">
+                        <option value="">Any</option>
+                        [% FOREACH list IN patron_lists %]
+                        <option value="[% list.patron_list_id | html %]">[% list.name | html %]</option>
+                        [% END %]
+                    </select>
+                </li>
+            </ol>
+            <ol>
 			    <li>
 			        <label for="issues">Books checked out: </label>
 			        <select id="issues" name="issues">
@@ -85,7 +110,12 @@
                         <option value="all">Book(s) checked out</option>
                         <option value="today">Book(s) due today</option>
                         <option value="overdue">Book(s) overdue</option>
+                        <option value="days_overdue">Book(s) a certain number of days overdue</option>
                     </select>
+                </li>
+                <li id="num_overdue_input_block" class="content_hidden">
+                    <label for="num_days">Days Overdue: </label>
+                    <input type="text" name="num_days" id="num_days" value=""/>
                 </li>
 			    <li>
 			        <label for="fines">(OR) Fines: </label>
@@ -173,6 +203,18 @@
 
 <script>
 $(document).ready(function() {
+    $("#issues").on("change",function(){
+        let selection = $("#issues").val();
+        let target = $("#num_overdue_input_block");
+        if ( selection == 'days_overdue' ) {
+            target.removeClass('content_hidden');
+        }
+        else {
+            target.addClass('content_hidden');
+            target.val('');
+        }
+    });
+
     $(".insert").on("click",function(){
         insertValueQuery();
     });

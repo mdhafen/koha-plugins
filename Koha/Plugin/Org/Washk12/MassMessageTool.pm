@@ -1,6 +1,6 @@
 package Koha::Plugin::Org::Washk12::MassMessageTool;
 
-## It's good practive to use Modern::Perl
+## It's good practice to use Modern::Perl
 use Modern::Perl;
 
 ## Required for all plugins
@@ -10,9 +10,10 @@ use base qw(Koha::Plugins::Base);
 use Koha::Notice::Templates;
 use Koha::Patron;
 use Koha::Library;
+use Koha::List::Patron qw( get_patron_lists );
 
 ## Here we set our plugin version
-our $VERSION = "1.1.3";
+our $VERSION = "1.2.0";
 
 ## Here is our metadata, some keys are required, some are optional
 our $metadata = {
@@ -20,7 +21,7 @@ our $metadata = {
     author => 'Michael Hafen',
     description => 'This tool plugin sends messages to patrons en-mass',
     date_authored   => '2021-08-09',
-    date_updated    => '2025-03-26',
+    date_updated    => '2026-10-22',
     minimum_version => 25.0501, ## min because of staff interface container wrapper
     maximum_version => undef,
     version         => $VERSION,
@@ -132,9 +133,12 @@ sub show_options {
         { value => 'fines.content', text => 'fines' },
     ];
 
+    my @patron_lists = get_patron_lists();
+
     $template->param(
         sort1 => $sort1,
         sort2 => $sort2,
+        patron_lists => \@patron_lists,
         letters => \%letters,
         sql_fields => \%sql_fields,
         tables => \@tables,
@@ -151,9 +155,12 @@ sub get_patrons {
     my $category = $input->param('category');
     my $sort1 = $input->param('sort1');
     my $sort2 = $input->param('sort2');
-    my $issues = $input->param('issues');  # ''|all|today|overdue
+    my $patron_list = $input->param('patron_list');
+    my $issues = $input->param('issues');  # ''|all|today|overdue|days_overdue
     my $fines = $input->param('fines');  # ''|fines
+    my $days_overdue = $input->param('num_days');
     my $send_to = $input->param('send_to');  # ''|home|work|both
+    $days_overdue += 0;  # force to int
 
     $template->param(
         step => 2,
@@ -185,6 +192,11 @@ sub get_patrons {
     elsif ( $issues eq 'overdue' ) {
         push @having, 'overdues > 0';
     }
+    elsif ( $issues eq 'days_overdue' && $days_overdue ) {
+        $overdue_select = ', (SELECT COUNT(*) FROM issues WHERE issues.borrowernumber = borrowers.borrowernumber AND TO_DAYS(NOW()) - TO_DAYS(date_due) = ?) AS overdues';
+        push @params, $days_overdue;
+        push @having, 'overdues > 0';
+    }
     elsif ( $issues eq 'all' ) {
         $overdue_select = ', (SELECT COUNT(*) FROM issues WHERE issues.borrowernumber = borrowers.borrowernumber) AS overdues';
         push @having, 'overdues > 0';
@@ -211,8 +223,12 @@ sub get_patrons {
         push @wheres, 'borrowers.sort2 = ?';
         push @params, $sort2;
     }
+    if ( $patron_list ) {
+        push @wheres, 'patron_list_id = ?';
+        push @params, $patron_list;
+    }
 
-    my $query = "SELECT borrowernumber,surname,firstname,sort1,sort2,description,$email_column $account_select $overdue_select FROM borrowers LEFT JOIN categories USING (categorycode)";
+    my $query = "SELECT borrowernumber,surname,firstname,sort1,sort2,description,$email_column $account_select $overdue_select FROM borrowers LEFT JOIN categories USING (categorycode) LEFT JOIN patron_list_patrons USING (borrowernumber)";
     $query .= ' WHERE '. ( join ' AND ', @wheres ) if (@wheres);
     $query .= ' GROUP BY borrowernumber';
     $query .= ' HAVING '. ( join ' OR ', @having ) if (@having);
