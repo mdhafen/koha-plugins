@@ -12,7 +12,7 @@ use C4::Context;
 use C4::Charset qw{MarcToUTF8Record};
 
 ## Here we set our plugin version
-our $VERSION = "1.0.5";
+our $VERSION = "1.0.6";
 
 ## Here is our metadata, some keys are required, some are optional
 our $metadata = {
@@ -60,13 +60,10 @@ sub to_marc {
 
     my $libraries_filter = {};
     if ( C4::Context->only_my_library() ) {
-        $libraries_filter->{'-or'} = [
-            'branchcode' => C4::Context->userenv->{'branch'},
-            'branchcode' => undef,
-        ];
+        $libraries_filter->{'branchcode'} = C4::Context->userenv->{'branch'};
     }
     my $libraries = Koha::Libraries->search($libraries_filter)->unblessed;
-    my $itemtypes = Koha::ItemTypes->search_with_localization($libraries_filter,{'join'=>['itemtypes_branches']})->unblessed;
+    my $itemtypes = Koha::ItemTypes->search->unblessed;
 
     foreach my $text ( split "\035", $data ) {
         my ($record) = MarcToUTF8Record($text,C4::Context->preference('marcflavour'),'');
@@ -86,7 +83,7 @@ sub to_marc {
 
         foreach my $field_852 (@field_852) {
             my ( $homeb, $holdb, $call, $price ) = ('','','',0);
-            my ( $bar, $notes, $urls, $type ) = ('','','','');
+            my ( $bar, $notes, $urls, $itype ) = ('','','','');
             my @fields;
             $homeb = $field_852->subfield('a') || C4::Context->userenv->{'branch'};
             $holdb = $field_852->subfield('b') || C4::Context->userenv->{'branch'};
@@ -104,6 +101,13 @@ sub to_marc {
             unless ( $holdb && grep { $_->{'branchcode'} eq $holdb } @$libraries ) {
                 $holdb = C4::Context->userenv->{'branch'} || undef;
             }
+            # validate item type
+            for my $t ( $field_852->subfield('g'), $field_852->subfield('y'), $type ) {
+                if ( $t && grep { $_->{'itemtype'} eq $t } @$itemtypes ) {
+                    $itype = $t;
+                    last;
+                }
+            }
             # Don't validate barcode being unique, that is already handled
 
             push( @fields, 'a' => $homeb ) if ( $homeb );
@@ -114,7 +118,7 @@ sub to_marc {
             push( @fields, 'p' => $bar ) if ( $bar );
             push( @fields, 'z' => $notes ) if ( $notes );
             push( @fields, 'u' => $urls ) if ( $urls );
-            push( @fields, 'y' => $type ) if ( $type );
+            push( @fields, 'y' => $itype ) if ( $itype );
             push( @fields, '2' => $field_852->subfield('2') ) if ( $field_852->subfield('2') );
             push( @fields, '3' => $field_852->subfield('3') ) if ( $field_852->subfield('3') );
             push( @fields, 'c' => $field_852->subfield('c') ) if ( $field_852->subfield('c') );
